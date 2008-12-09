@@ -3,6 +3,9 @@ README
 azure-examples
 Mike Amundsen (mamund@yahoo.com)
 
+NOTE:
+To use this stuff, you'll need your own Azure Storage project, endpoint, and sharedkey
+
 2008-12-8 (mca)
 This is a set of test and on-off apps experimenting w/ MSFT Azure Table Storage.
 This uses only base-line C# (2.0) - no fancy SDKs. All done via HTTP request/response.
