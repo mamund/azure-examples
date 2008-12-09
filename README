@@ -1,0 +1,11 @@
+README
+
+azure-examples
+Mike Amundsen (mamund@yahoo.com)
+
+2008-12-8 (mca)
+This is a set of test and on-off apps experimenting w/ MSFT Azure Table Storage.
+This uses only base-line C# (2.0) - no fancy SDKs. All done via HTTP request/response.
+
+This is really early stuff. Likely it doesn't do what you want. Use it if you like, but don't complain.
+Make it better and tell me all about it.
