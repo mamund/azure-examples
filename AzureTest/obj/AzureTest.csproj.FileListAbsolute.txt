@@ -1,0 +1,6 @@
+D:\AzureTest\AzureTest\obj\Debug\ResolveAssemblyReference.cache
+D:\AzureTest\AzureTest\bin\Debug\AzureTest.exe
+D:\AzureTest\AzureTest\bin\Debug\AzureTest.pdb
+D:\AzureTest\AzureTest\obj\Debug\AzureTest.exe
+D:\AzureTest\AzureTest\obj\Debug\AzureTest.pdb
+D:\AzureTest\AzureTest\bin\Debug\AzureTest.exe.config

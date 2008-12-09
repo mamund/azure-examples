@@ -1,0 +1,8 @@
+D:\AzureTest\Azure Console\obj\Debug\ResolveAssemblyReference.cache
+D:\AzureTest\Azure Console\bin\Debug\azure.exe
+D:\AzureTest\Azure Console\bin\Debug\azure.pdb
+D:\AzureTest\Azure Console\bin\Debug\Amundsen.Utilities.dll
+D:\AzureTest\Azure Console\bin\Debug\Amundsen.Utilities.pdb
+D:\AzureTest\Azure Console\obj\Debug\azure.exe
+D:\AzureTest\Azure Console\obj\Debug\azure.pdb
+D:\AzureTest\Azure Console\bin\Debug\azure.exe.config

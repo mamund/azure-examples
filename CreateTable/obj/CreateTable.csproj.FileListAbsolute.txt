@@ -1,0 +1,6 @@
+D:\AzureTest\CreateTable\obj\Debug\ResolveAssemblyReference.cache
+D:\AzureTest\CreateTable\bin\Debug\CreateTable.exe
+D:\AzureTest\CreateTable\bin\Debug\CreateTable.pdb
+D:\AzureTest\CreateTable\obj\Debug\CreateTable.exe
+D:\AzureTest\CreateTable\obj\Debug\CreateTable.pdb
+D:\AzureTest\CreateTable\bin\Debug\CreateTable.exe.config
