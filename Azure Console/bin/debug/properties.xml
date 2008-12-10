@@ -1,0 +1,17 @@
+<m:properties   
+  xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"
+  xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+  <!-- two required items - do not change -->
+  <d:PartitionKey>{0}</d:PartitionKey>
+  <d:RowKey>{1}</d:RowKey>
+  <!-- two required items - do not change -->
+  <d:Address>Mountain View</d:Address>
+  <d:Age m:type="Edm.Int32">23</d:Age>
+  <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+  <d:BinaryData m:type="Edm.Binary" m:null="true" />
+  <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+  <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00</d:CustomerSince>
+  <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+  <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+  <d:Timestamp m:type="Edm.DateTime">0001-01-01T00:00:00</d:Timestamp>
+</m:properties>
