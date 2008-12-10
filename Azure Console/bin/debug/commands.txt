@@ -1,4 +1,5 @@
-Azure Table Storage Console (1.0 - 2008-12-07)
+
+Azure Table Storage Console (1.0b - 2008-12-09)
 
 Tables:
 	/{tid} [[g]et]
@@ -20,5 +21,13 @@ Entities:
 	/{tid}/{pid},{rid} "{xml|filename}" p[u]t
 	ex: /my-table/my-partition,my-row c:\modified-properties.xml u
 
+	/{tid}/{pid},{rid} "{xml|filename}" [m]erge
+	ex: /my-table/my-partition,my-row c:\partial-properties.xml u
+
 	/{tid}/{pid},{rid} [d]elete
 	ex: /my-table/my-partition,my-row d
+
+Queries:
+	/{tid}/? "{query}" [[g]et]
+	ex: /my-table/? "[valid Astoria query]"
+

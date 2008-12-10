@@ -8,7 +8,7 @@ To use this stuff, you'll need your own Azure Storage project, endpoint, and sha
 
 2008-12-09 (mca)
 Updated to clean up Entity details. Added sample XML documents (properites.xml & mytable.xml).
-This version has full support for Tables & Entities (GET, POST, PUT, DELETE). See the "commands.txt"
+This version has full support for Tables & Entities (GET, POST, PUT, MERGE, DELETE). See the "commands.txt"
 file for examples.
 
 2008-12-08 (mca)

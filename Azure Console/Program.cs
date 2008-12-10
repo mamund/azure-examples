@@ -1,24 +1,25 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
-using Amundsen.Utilities;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Net;
 using System.IO;
+
+using Amundsen.Utilities;
 
 namespace Amundsen.Azure.CommandLine
 {
   /// <summary>
   /// Public Domain 2008 amundsen.com, inc.
   /// @author   mike amundsen (mamund@yahoo.com)
+  /// @version  1.0b (2008-12-09)
+  /// @notes    2008-12-09 :  cleaned up POST/PUT coding. added support for properties.xml
+  ///                         updated the ShowHelp() text.
   /// @version  1.0 (2008-12-08)
   /// @notes    2008-12-08 :  this is really early stuff. likely it doesn't do what you want. 
   ///                         use it if you like, but don't complain. make it better and tell
   ///                         me all about it. (mca)
-  /// @version  1.0 (2008-12-09)
-  /// @notes    2008-12-09 :  cleaned up POST/PUT coding. added support for properties.xml
-  ///                         updated the ShowHelp() text.
   /// </summary>
   class AzureConsole
   {
@@ -51,9 +52,9 @@ namespace Amundsen.Azure.CommandLine
         ac.SharedKey = azureSharedKey;
 
         uri = arglist[0];
-        cmd = (args.Length == 1 ? "get" : (uri.IndexOf("?") == -1 ? arglist[1] : "get"));
+        cmd = (args.Length == 1 ? "get" : (uri.IndexOf("?", StringComparison.CurrentCultureIgnoreCase) == -1 ? arglist[1] : "get"));
 
-        // authority command
+        // table command
         if (Regex.IsMatch(uri, table_regex, RegexOptions.IgnoreCase))
         {
           ac.Tables(new string[] { cmd, uri.Replace("/", "") });
@@ -85,17 +86,17 @@ namespace Amundsen.Azure.CommandLine
       }
       catch (HttpException hex)
       {
-        Console.Out.WriteLine(string.Format("\n***ERROR: {0} : {1}\n", hex.GetHttpCode(),hex.Message));
+        Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"\n***ERROR: {0} : {1}\n", hex.GetHttpCode(),hex.Message));
       }
       catch (Exception ex)
       {
-        Console.Out.WriteLine(string.Format("\n***ERROR: {0}\n", ex.Message));
+        Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"\n***ERROR: {0}\n", ex.Message));
       }
     }
 
     private static void ShowHelp()
     {
-      Console.Out.WriteLine("\nAzure Table Storage Console (1.0 - 2008-12-07)\n");
+      Console.Out.WriteLine("\nAzure Table Storage Console (1.0b - 2008-12-09)\n");
 
       Console.Out.WriteLine("Tables:");
       Console.Out.WriteLine("\t/{tid} [[g]et]\n\tex: /my-table\n");
@@ -106,6 +107,7 @@ namespace Amundsen.Azure.CommandLine
       Console.Out.WriteLine("\t/{tid}/{pid},{rid} [[g]et]\n\tex: /my-table/my-partition,my-row\n");
       Console.Out.WriteLine("\t/{tid}/{pid},{rid} \"{xml}|{filename}\" [p]ost\n\tex: /my-table/my-partition,myrow c:\\new-properties.xml p\n");
       Console.Out.WriteLine("\t/{tid}/{pid},{rid} \"{xml|filename}\" p[u]t\n\tex: /my-table/my-partition,my-row c:\\modified-properties.xml u\n");
+      Console.Out.WriteLine("\t/{tid}/{pid},{rid} \"{xml|filename}\" [m]erge\n\tex: /my-table/my-partition,my-row c:\\partial-properties.xml u\n");
       Console.Out.WriteLine("\t/{tid}/{pid},{rid} [d]elete\n\tex: /my-table/my-partition,my-row d\n");
 
       Console.Out.WriteLine("Queries:");
@@ -162,8 +164,8 @@ namespace Amundsen.Azure.CommandLine
       int cmd = 0;
       int table = 1;
 
-      string canonicalResource = string.Format("/{0}/{1}", this.Account, "Tables");
-      string requestUrl = string.Format("{0}/{1}", this.EndPoint, "Tables");
+      string canonicalResource = string.Format(CultureInfo.CurrentCulture,"/{0}/{1}", this.Account, "Tables");
+      string requestUrl = string.Format(CultureInfo.CurrentCulture,"{0}/{1}", this.EndPoint, "Tables");
       requestDate = DateTime.UtcNow;
 
       switch (args[cmd].ToLower())
@@ -174,16 +176,16 @@ namespace Amundsen.Azure.CommandLine
           
           if (args[table] != string.Empty)
           {
-            canonicalResource += string.Format("('{0}')", args[table]);
-            requestUrl += string.Format("('{0}')", args[table]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
           }
           
           authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
 
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
           this.ETag = client.ResponseHeaders["etag"];
@@ -203,12 +205,12 @@ namespace Amundsen.Azure.CommandLine
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders.Add("Content-MD5", contentMD5);
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+          client.RequestHeaders["Content-MD5"] = contentMD5;
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
           
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
-          Console.Out.WriteLine(string.Format("Table [{0}] has been added.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : args[table])));
+          Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Table [{0}] has been added.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : args[table])));
 
           break;
 
@@ -218,19 +220,19 @@ namespace Amundsen.Azure.CommandLine
           
           if (args[table] != string.Empty)
           {
-            canonicalResource += string.Format("('{0}')", args[table]);
-            requestUrl += string.Format("('{0}')", args[table]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
           }
           
           authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
 
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
-          Console.Out.WriteLine(string.Format("Table [{0}] has been deleted.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : args[table])));
+          Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Table [{0}] has been deleted.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : args[table])));
           
           break;
 
@@ -251,8 +253,8 @@ namespace Amundsen.Azure.CommandLine
       int row = 3;
       int doc = 4;
 
-      string canonicalResource = string.Format("/{0}/{1}", this.Account, args[table]);
-      string requestUrl = string.Format("{0}/{1}", this.EndPoint, args[table]);
+      string canonicalResource = string.Format(CultureInfo.CurrentCulture,"/{0}/{1}", this.Account, args[table]);
+      string requestUrl = string.Format(CultureInfo.CurrentCulture,"{0}/{1}", this.EndPoint, args[table]);
       requestDate = DateTime.UtcNow;
 
       switch (args[cmd].ToLower())
@@ -263,21 +265,21 @@ namespace Amundsen.Azure.CommandLine
           
           if (args.Length > 2 && args[partition]!=string.Empty && args[row]!=string.Empty)
           {
-            canonicalResource += string.Format("(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
-            requestUrl += string.Format("(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
           }
           else
           {
-            canonicalResource += string.Format("()");
-            requestUrl += string.Format("()");
+            canonicalResource += string.Format(CultureInfo.CurrentCulture,"()");
+            requestUrl += string.Format(CultureInfo.CurrentCulture,"()");
           }
           
           authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
 
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
           this.ETag = client.ResponseHeaders["etag"];
@@ -287,7 +289,6 @@ namespace Amundsen.Azure.CommandLine
         case "p":
         case "post":
           method = "POST";
-          rtnBody = string.Empty;
           
           // get data from command line and build up body
           readBody = ResolveDocument(args[doc]);
@@ -299,12 +300,12 @@ namespace Amundsen.Azure.CommandLine
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders.Add("Content-MD5", contentMD5);
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+          client.RequestHeaders["Content-MD5"] = contentMD5;
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
           
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
-          Console.Out.WriteLine(string.Format("Entity [{0}] has been added.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format("{0}/{1},{2}", args[table], args[partition], args[row]))));
+          Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Entity [{0}] has been added.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture,"{0}/{1},{2}", args[table], args[partition], args[row]))));
 
           break;
 
@@ -314,17 +315,17 @@ namespace Amundsen.Azure.CommandLine
           
           if (args.Length > 2)
           {
-            canonicalResource += string.Format("(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
-            requestUrl += string.Format("(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
           }
 
           // build hash to GET for Etag;
           authValue = string.Format(fmtStringToSign, "GET", contentMD5, contentType, requestDate, canonicalResource);
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-          
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
 
           // get rec to record etag
           rtnBody = client.Execute(requestUrl, "GET", contentType);
@@ -341,15 +342,59 @@ namespace Amundsen.Azure.CommandLine
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
           
-          client.RequestHeaders["x-ms-date"]=string.Format("{0:R}", requestDate);
-          client.RequestHeaders["authorization"] =authHeader;
-          client.RequestHeaders.Add("content-md5", contentMD5);
-          client.RequestHeaders.Add("if-match", this.ETag);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
+          client.RequestHeaders["content-md5"] = contentMD5;
+          client.RequestHeaders["if-match"] = this.ETag;
 
           // PUT to the server & report results
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
-          Console.Out.WriteLine(string.Format("Entity [{0}] has been updated.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format("{0}/{1},{2}", args[table], args[partition], args[row]))));
+          Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Entity [{0}] has been replaced.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture,"{0}/{1},{2}", args[table], args[partition], args[row]))));
           
+          break;
+
+        case "m":
+        case "merge":
+          method = "MERGE";
+
+          if (args.Length > 2)
+          {
+            canonicalResource += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+          }
+
+          // build hash to GET for Etag;
+          authValue = string.Format(fmtStringToSign, "GET", contentMD5, contentType, requestDate, canonicalResource);
+          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
+          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
+
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
+
+          // get rec to record etag
+          rtnBody = client.Execute(requestUrl, "GET", contentType);
+          this.ETag = client.ResponseHeaders["etag"];
+
+          // accept input doc and parse into valid Atom for Azure Tables
+          rtnBody = string.Empty;
+          readBody = ResolveDocument(args[doc]);
+          body = string.Format(updateEntityXml, args[table], args[partition], args[row], requestDate, readBody, this.ETag.Replace(@"""", "&quot;"), this.Account);
+          contentMD5 = h.MD5(body);
+
+          // build hash value
+          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
+          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
+          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
+
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
+          client.RequestHeaders["content-md5"] = contentMD5;
+          client.RequestHeaders["if-match"] = this.ETag;
+
+          // PUT to the server & report results
+          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
+          Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entity [{0}] has been merged.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture, "{0}/{1},{2}", args[table], args[partition], args[row]))));
+
           break;
 
         case "d":
@@ -358,8 +403,8 @@ namespace Amundsen.Azure.CommandLine
           
           if (args.Length>2)
           {
-            canonicalResource += string.Format("(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
-            requestUrl += string.Format("(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
           }
 
           // build up GET to recover Etag;
@@ -367,8 +412,8 @@ namespace Amundsen.Azure.CommandLine
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders.Add("x-ms-date", string.Format("{0:R}", requestDate));
-          client.RequestHeaders.Add("authorization", authHeader);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          client.RequestHeaders["authorization"] = authHeader;
 
           // get rec to record etag
           rtnBody = client.Execute(requestUrl, "GET", contentType);
@@ -380,12 +425,12 @@ namespace Amundsen.Azure.CommandLine
           sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
           authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
 
-          client.RequestHeaders["x-ms-date"] = string.Format("{0:R}", requestDate);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
-          client.RequestHeaders.Add("if-match", this.ETag);
+          client.RequestHeaders["if-match"] = this.ETag;
 
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
-          Console.Out.WriteLine(string.Format("Entity [{0}] has been deleted.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format("{0}/{1},{2}",args[table],args[partition],args[row]))));
+          Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Entity [{0}] has been deleted.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture,"{0}/{1},{2}",args[table],args[partition],args[row]))));
 
           break;
 
@@ -405,14 +450,14 @@ namespace Amundsen.Azure.CommandLine
       string rtn = string.Empty;
 
       // passed as literal string?
-      if (doc.IndexOf("<m:properties") != -1)
+      if (doc.IndexOf("<m:properties", StringComparison.CurrentCultureIgnoreCase) != -1)
       {
         rtn = doc;
       }
       else
       {
         // must be a file pointer
-        if (doc.IndexOf(":") == -1)
+        if (doc.IndexOf(":", StringComparison.CurrentCultureIgnoreCase) == -1)
         {
           doc = Directory.GetCurrentDirectory() + @"\"+ doc;
         }
@@ -443,7 +488,6 @@ namespace Amundsen.Azure.CommandLine
           </m:properties>
         </content>
       </entry>";
-
 
     // stub create entity body
     string createEntityXml = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
