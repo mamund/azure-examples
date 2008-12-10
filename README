@@ -7,11 +7,11 @@ NOTE:
 To use this stuff, you'll need your own Azure Storage project, endpoint, and sharedkey
 
 2008-12-09 (mca)
-2008-12-08 (mca)
 Updated to clean up Entity details. Added sample XML documents (properites.xml & mytable.xml).
 This version has full support for Tables & Entities (GET, POST, PUT, DELETE). See the "commands.txt"
 file for examples.
 
+2008-12-08 (mca)
 This is a set of test and on-off apps experimenting w/ MSFT Azure Table Storage.
 This uses only base-line C# (2.0) - no fancy SDKs. All done via HTTP request/response.
 
