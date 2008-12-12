@@ -6,6 +6,16 @@ Mike Amundsen (mamund@yahoo.com)
 NOTE:
 To use this stuff, you'll need your own Azure Storage project, endpoint, and sharedkey
 
+2008-12-11 (mca)
+This is the first 'complete' version of the Azure.exe command-line app. It has full support for
+Tables(GET, POST, DELETE) and Entities(GET, POST, PUT, MERGE, DELETE) as well as suport for ad-hoc
+queries. The full details of proper query syntax escape me right now. Seems some features of Astoria
+are not available for Azure Tables yet; more to come.
+
+NOTE: There is a dependency in this code for another assembly of mine: Amundsen.Utilites.dll. The source
+is not in this "git" but can be pulled from http://mikeamundsen.googlecode.com. I'll pull together a complete
+source kit in the next few days and make it available as a ZIP set.
+
 2008-12-09 (mca)
 Updated to clean up Entity details. Added sample XML documents (properites.xml & mytable.xml).
 This version has full support for Tables & Entities (GET, POST, PUT, MERGE, DELETE). See the "commands.txt"

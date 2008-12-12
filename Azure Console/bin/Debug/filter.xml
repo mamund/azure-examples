@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<feed xml:base="http://mamund.table.core.windows.net/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">mytable</title>
+  <id>http://mamund.table.core.windows.net/mytable</id>
+  <updated>2008-12-11T03:48:50Z</updated>
+  <link rel="self" title="mytable" href="mytable" />
+</feed>

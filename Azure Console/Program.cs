@@ -13,13 +13,20 @@ namespace Amundsen.Azure.CommandLine
   /// <summary>
   /// Public Domain 2008 amundsen.com, inc.
   /// @author   mike amundsen (mamund@yahoo.com)
+  /// 
+  /// @version  1.0c (2008-12-10)
+  /// @notes    added support for MERGE and ad-hod queries
+  ///           refactored the key-signing and other code.
+  ///           updated ShowHelp() text
+  /// 
   /// @version  1.0b (2008-12-09)
-  /// @notes    2008-12-09 :  cleaned up POST/PUT coding. added support for properties.xml
-  ///                         updated the ShowHelp() text.
+  /// @notes    cleaned up POST/PUT coding. added support for properties.xml
+  ///           updated the ShowHelp() text.
+  /// 
   /// @version  1.0 (2008-12-08)
-  /// @notes    2008-12-08 :  this is really early stuff. likely it doesn't do what you want. 
-  ///                         use it if you like, but don't complain. make it better and tell
-  ///                         me all about it. (mca)
+  /// @notes    this is really early stuff. likely it doesn't do what you want. 
+  ///           use it if you like, but don't complain. make it better and tell
+  ///           me all about it. (mca)
   /// </summary>
   class AzureConsole
   {
@@ -29,8 +36,9 @@ namespace Amundsen.Azure.CommandLine
 
     static string table_regex = "^/([^/]*)$";
     static string entity_regex = "^/([^/]*)/(([^,]*),(.*))?$";
-    static string query_regex = "^/([^/]*)/\\?(.*)$"; 
+    static string query_regex = @"^\?(.*)$"; 
 
+    // handler user interaction
     static void Main(string[] args)
     {
       AzureCommands ac = new AzureCommands();
@@ -73,17 +81,18 @@ namespace Amundsen.Azure.CommandLine
         // query command
         if (Regex.IsMatch(uri, query_regex, RegexOptions.IgnoreCase))
         {
-          string[] elm = uri.Split('/');
-          ac.Queries(new string[] { cmd, elm[1], elm[2], arglist[1] });
+          uri = uri.Substring(1);
+          string[] elm = { uri };
+          ac.Queries(new string[] { cmd, elm[0]});
           return;
         }
 
         // failed to recognize command uri
         Console.Out.WriteLine("***ERROR: unable to parse command line!");
         ShowHelp();
-        return;
 
-      }
+        return;
+        }
       catch (HttpException hex)
       {
         Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"\n***ERROR: {0} : {1}\n", hex.GetHttpCode(),hex.Message));
@@ -111,7 +120,7 @@ namespace Amundsen.Azure.CommandLine
       Console.Out.WriteLine("\t/{tid}/{pid},{rid} [d]elete\n\tex: /my-table/my-partition,my-row d\n");
 
       Console.Out.WriteLine("Queries:");
-      Console.Out.WriteLine("\t/{tid}/? \"{query}\" [[g]et]\n\tex: /my-table/? \"[valid Astoria query]\"\n");
+      Console.Out.WriteLine("\t\"?{query}\" [[g]et]\n\tex: \"?Customers()?$filter=(Region eq 'north')\"\n");
     }
 
     private static void HandleConfigSettings()
@@ -123,6 +132,7 @@ namespace Amundsen.Azure.CommandLine
     }
   }
 
+  // the real work is done here
   class AzureCommands
   {
     HttpClient client = new HttpClient();
@@ -132,35 +142,31 @@ namespace Amundsen.Azure.CommandLine
     {
       client.UserAgent = "amundsen/1.0";
     }
-    public AzureCommands(string account, string endPoint, string sharedKey)
+    public AzureCommands(string account, string endPoint, string sharedKey, string keyType)
     {
       this.Account = account;
       this.EndPoint = endPoint;
       this.SharedKey = sharedKey;
+      this.KeyType = keyType;
       client.UserAgent = "amundsen/1.0";
     }
 
     public string Account = string.Empty;
     public string EndPoint = string.Empty;
     public string SharedKey = string.Empty;
+    public string KeyType = "SharedKey";
     public string ETag = string.Empty;
 
     private string contentType = "application/atom+xml";
-    private string keyType = "SharedKey";
     private DateTime requestDate = DateTime.UtcNow;
     private string contentMD5 = string.Empty;
-    private string fmtHeader = "{0} {1}:{2}";
-    private string fmtStringToSign = "{0}\n{1}\n{2}\n{3:R}\n{4}";
-
-    private string authValue = string.Empty;
-    private string sigValue = string.Empty;
     private string authHeader = string.Empty;
     private string method = string.Empty;
 
     public void Tables(string[] args)
     {
-      string body = string.Empty;
-      string url = string.Empty;
+      string sendBody = string.Empty;
+      string rtnBody = string.Empty;
       int cmd = 0;
       int table = 1;
 
@@ -174,16 +180,16 @@ namespace Amundsen.Azure.CommandLine
         case "get":
           method = "GET";
           
+          // single tale or all tables?
           if (args[table] != string.Empty)
           {
+            // single table
             canonicalResource += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
             requestUrl += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
           }
           
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
+          // do GET
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
 
@@ -195,21 +201,18 @@ namespace Amundsen.Azure.CommandLine
         case "p":
         case "post":
           method = "POST";
-          string rtnBody = string.Empty;
 
-          // use stub body and insert table name
-          body = string.Format(createTableXml, requestDate, args[table]);
-          contentMD5 = h.MD5(body);
-          
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
+          // build valid Atom document
+          sendBody = string.Format(createTableXml, requestDate, args[table]);
+          contentMD5 = h.MD5(sendBody);
 
+          // do POST
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["Content-MD5"] = contentMD5;
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
           
-          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
+          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, sendBody));
           Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Table [{0}] has been added.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : args[table])));
 
           break;
@@ -218,16 +221,19 @@ namespace Amundsen.Azure.CommandLine
         case "delete":
           method = "DELETE";
           
+          // build up uri
           if (args[table] != string.Empty)
           {
-            canonicalResource += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
-            requestUrl += string.Format(CultureInfo.CurrentCulture,"('{0}')", args[table]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture, "('{0}')", args[table]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture, "('{0}')", args[table]);
+          }
+          else
+          {
+            throw new HttpException(400, "Missing TableName");
           }
           
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
+          // do DELETE
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
 
@@ -243,10 +249,8 @@ namespace Amundsen.Azure.CommandLine
 
     public void Entities(string[] args)
     {
-      string body = string.Empty;
+      string sendBody = string.Empty;
       string readBody = string.Empty;
-      string rtnBody = string.Empty;
-      string url = string.Empty;
       int cmd = 0;
       int table = 1;
       int partition = 2;
@@ -263,22 +267,23 @@ namespace Amundsen.Azure.CommandLine
         case "get":
           method = "GET";
           
+          // work out URI format
           if (args.Length > 2 && args[partition]!=string.Empty && args[row]!=string.Empty)
           {
+            // single entity
             canonicalResource += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
             requestUrl += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
           }
           else
           {
+            // all entities
             canonicalResource += string.Format(CultureInfo.CurrentCulture,"()");
             requestUrl += string.Format(CultureInfo.CurrentCulture,"()");
           }
           
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
-          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          // do GET
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
 
           Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
@@ -289,22 +294,20 @@ namespace Amundsen.Azure.CommandLine
         case "p":
         case "post":
           method = "POST";
-          
-          // get data from command line and build up body
+
+          // accept input doc and parse into valid Atom for Azure Tables
           readBody = ResolveDocument(args[doc]);
-          body = string.Format(createEntityXml, requestDate, readBody);
-          body = string.Format(body, args[partition], args[row]);
-          contentMD5 = h.MD5(body);
+          sendBody = string.Format(createEntityXml, requestDate, readBody);
+          sendBody = string.Format(sendBody, args[partition], args[row]);
+          contentMD5 = h.MD5(sendBody);
 
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
+          // do POST
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["Content-MD5"] = contentMD5;
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
           
-          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
+          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, sendBody));
           Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Entity [{0}] has been added.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture,"{0}/{1},{2}", args[table], args[partition], args[row]))));
 
           break;
@@ -312,43 +315,37 @@ namespace Amundsen.Azure.CommandLine
         case "u":
         case "put":
           method = "PUT";
-          
+
           if (args.Length > 2)
           {
-            canonicalResource += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
-            requestUrl += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+          }
+          else
+          {
+            throw new HttpException(400, "Missing PartitionKey and/or RowKey");
           }
 
-          // build hash to GET for Etag;
-          authValue = string.Format(fmtStringToSign, "GET", contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
+          // do GET for Etag;
+          authHeader = CreateSharedKeyAuth("GET", canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
-
-          // get rec to record etag
-          rtnBody = client.Execute(requestUrl, "GET", contentType);
+          readBody = client.Execute(requestUrl, "GET", contentType);
           this.ETag = client.ResponseHeaders["etag"];
 
           // accept input doc and parse into valid Atom for Azure Tables
-          rtnBody = string.Empty;
-          readBody = ResolveDocument(args[doc]);
-          body = string.Format(updateEntityXml, args[table], args[partition], args[row], requestDate, readBody,this.ETag.Replace(@"""","&quot;"),this.Account);
-          contentMD5 = h.MD5(body);
+          sendBody = ResolveDocument(args[doc]);
+          sendBody = string.Format(updateEntityXml, args[table], args[partition], args[row], requestDate, sendBody, this.ETag.Replace(@"""", "&quot;"), this.Account);
+          contentMD5 = h.MD5(sendBody);
 
-          // build tha hash value
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-          
-          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          // do PUT
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
           client.RequestHeaders["content-md5"] = contentMD5;
           client.RequestHeaders["if-match"] = this.ETag;
 
-          // PUT to the server & report results
-          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
+          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, sendBody));
           Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture,"Entity [{0}] has been replaced.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture,"{0}/{1},{2}", args[table], args[partition], args[row]))));
           
           break;
@@ -362,37 +359,31 @@ namespace Amundsen.Azure.CommandLine
             canonicalResource += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
             requestUrl += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
           }
+          else
+          {
+            throw new HttpException(400, "Missing PartitionKey and/or RowKey");
+          }
 
-          // build hash to GET for Etag;
-          authValue = string.Format(fmtStringToSign, "GET", contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
+          // do GET for Etag;
+          authHeader = CreateSharedKeyAuth("GET", canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
-
-          // get rec to record etag
-          rtnBody = client.Execute(requestUrl, "GET", contentType);
+          readBody = client.Execute(requestUrl, "GET", contentType);
           this.ETag = client.ResponseHeaders["etag"];
 
           // accept input doc and parse into valid Atom for Azure Tables
-          rtnBody = string.Empty;
-          readBody = ResolveDocument(args[doc]);
-          body = string.Format(updateEntityXml, args[table], args[partition], args[row], requestDate, readBody, this.ETag.Replace(@"""", "&quot;"), this.Account);
-          contentMD5 = h.MD5(body);
+          sendBody = ResolveDocument(args[doc]);
+          sendBody = string.Format(updateEntityXml, args[table], args[partition], args[row], requestDate, sendBody, this.ETag.Replace(@"""", "&quot;"), this.Account);
+          contentMD5 = h.MD5(sendBody);
 
-          // build hash value
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
+          // do merge
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
           client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
           client.RequestHeaders["content-md5"] = contentMD5;
           client.RequestHeaders["if-match"] = this.ETag;
 
-          // PUT to the server & report results
-          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, body));
+          Console.Out.WriteLine(client.Execute(requestUrl, method, contentType, sendBody));
           Console.Out.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entity [{0}] has been merged.", (client.ResponseHeaders["location"] != null ? client.ResponseHeaders["location"] : string.Format(CultureInfo.CurrentCulture, "{0}/{1},{2}", args[table], args[partition], args[row]))));
 
           break;
@@ -400,32 +391,29 @@ namespace Amundsen.Azure.CommandLine
         case "d":
         case "delete":
           method = "DELETE";
+          contentMD5 = string.Empty;
           
-          if (args.Length>2)
+          // validate uri
+          if (args.Length > 2)
           {
-            canonicalResource += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
-            requestUrl += string.Format(CultureInfo.CurrentCulture,"(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            canonicalResource += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+            requestUrl += string.Format(CultureInfo.CurrentCulture, "(PartitionKey='{0}',RowKey='{1}')", args[partition], args[row]);
+          }
+          else
+          {
+            throw new HttpException(400, "Missing PartitionKey and/or RowKey");
           }
 
-          // build up GET to recover Etag;
-          authValue = string.Format(fmtStringToSign, "GET", contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
-          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          // do GET to recover Etag;
+          authHeader = CreateSharedKeyAuth("GET", canonicalResource, contentMD5, requestDate);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
-
-          // get rec to record etag
-          rtnBody = client.Execute(requestUrl, "GET", contentType);
+          readBody = client.Execute(requestUrl, "GET", contentType);
           this.ETag = client.ResponseHeaders["etag"];
-          contentMD5 = string.Empty;
 
-          // now build up DELETE to finish the job
-          authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, canonicalResource);
-          sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
-          authHeader = string.Format(fmtHeader, keyType, this.Account, sigValue);
-
-          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture,"{0:R}", requestDate);
+          // now do DELETE to finish the job
+          authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
+          client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
           client.RequestHeaders["authorization"] = authHeader;
           client.RequestHeaders["if-match"] = this.ETag;
 
@@ -442,6 +430,26 @@ namespace Amundsen.Azure.CommandLine
     // cool query parser goes here.
     public void Queries(string[] args)
     {
+      int query = 1;
+      method = "GET";
+      
+      // parse query
+      string queryText = args[query];
+      requestDate = DateTime.UtcNow;
+      string[] qparts = queryText.Split('?');
+      string canonicalResource = string.Format(CultureInfo.CurrentCulture, "/{0}/{1}", this.Account, qparts[0]);
+      string requestUrl = string.Format(CultureInfo.CurrentCulture, "{0}/{1}", this.EndPoint, queryText);
+
+      // do GET
+      authHeader = CreateSharedKeyAuth(method, canonicalResource, contentMD5, requestDate);
+      client.RequestHeaders["x-ms-date"] = string.Format(CultureInfo.CurrentCulture, "{0:R}", requestDate);
+      client.RequestHeaders["authorization"] = authHeader;
+
+      Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
+      this.ETag = client.ResponseHeaders["etag"];
+
+      return;
+
     }
 
     // collect properties xml (from disk, if needed)
@@ -470,6 +478,19 @@ namespace Amundsen.Azure.CommandLine
       return rtn;
     }
 
+    private string CreateSharedKeyAuth(string method, string resource, string contentMD5, DateTime requestDate)
+    {
+      string rtn = string.Empty;
+      string fmtHeader = "{0} {1}:{2}";
+      string fmtStringToSign = "{0}\n{1}\n{2}\n{3:R}\n{4}";
+
+      string authValue = string.Format(fmtStringToSign, method, contentMD5, contentType, requestDate, resource);
+      string sigValue = h.MacSha(authValue, Convert.FromBase64String(this.SharedKey));
+      rtn = string.Format(fmtHeader, this.KeyType, this.Account, sigValue);
+      
+      
+      return rtn;
+    }
     // stub create table body
     string createTableXml = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
       <entry 
