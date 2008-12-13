@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>"?mytable()?$filter=(IsActive eq true)"</StartArguments>
+    <StartArguments>"?mytable()?$top=1"</StartArguments>
   </PropertyGroup>
 </Project>

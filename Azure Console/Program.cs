@@ -14,6 +14,9 @@ namespace Amundsen.Azure.CommandLine
   /// Public Domain 2008 amundsen.com, inc.
   /// @author   mike amundsen (mamund@yahoo.com)
   /// 
+  /// @version  1.0d (2008-12-12)
+  /// @notes    added support for pageing/continuation headers (Entity queries)
+  /// 
   /// @version  1.0c (2008-12-10)
   /// @notes    added support for MERGE and ad-hod queries
   ///           refactored the key-signing and other code.
@@ -162,6 +165,8 @@ namespace Amundsen.Azure.CommandLine
     private string contentMD5 = string.Empty;
     private string authHeader = string.Empty;
     private string method = string.Empty;
+    string nextPartKey = string.Empty;
+    string nextRowKey = string.Empty;
 
     public void Tables(string[] args)
     {
@@ -447,8 +452,38 @@ namespace Amundsen.Azure.CommandLine
 
       Console.Out.WriteLine(client.Execute(requestUrl, method, contentType));
       this.ETag = client.ResponseHeaders["etag"];
-
-      return;
+      
+      // support custom continuation headers
+      nextPartKey = (client.ResponseHeaders["x-ms-continuation-NextPartitionKey"] != null ? client.ResponseHeaders["x-ms-continuation-NextPartitionKey"] : string.Empty);
+      nextRowKey = (client.ResponseHeaders["x-ms-continuation-NextRowKey"] != null ? client.ResponseHeaders["x-ms-continuation-NextRowKey"] : string.Empty);
+      if (nextPartKey != string.Empty && nextRowKey != string.Empty)
+      {
+        // get user keypoke
+        Console.Write("[n]ext, e[x]it");
+        ConsoleKeyInfo ki = new ConsoleKeyInfo();
+        while (ki.KeyChar != 'n' & ki.KeyChar != 'x')
+        {
+          ki = Console.ReadKey(true);
+        }
+        
+        // ok, let's get next page
+        if (ki.KeyChar=='n')
+        {
+          // fix-up query string for continuation
+          if (args[query].IndexOf("&NextPartitionKey=") != -1)
+          {
+            args[query] = args[query].Substring(0, args[query].IndexOf("&NextPartitionKey="));
+          }
+          args[query] += string.Format(CultureInfo.CurrentCulture, "&NextPartitionKey={0}&NextRowKey={1}", nextPartKey, nextRowKey);
+          
+          // get more data
+          this.Queries(args);
+        }
+      }
+      else
+      {
+        return; // all done
+      }
 
     }
 
