@@ -6,6 +6,10 @@ Mike Amundsen (mamund@yahoo.com)
 NOTE:
 To use this stuff, you'll need your own Azure Storage project, endpoint, and sharedkey
 
+2008-12-14 (mca)
+Added support for "paging" for Table queries. 
+Added several feed documents for testing purposes.
+
 2008-12-12 (mca)
 Added support for "paging" via the custom continuation headers. This is currently only in the
 Queries() method [GET Entities] and 'kicks in' when you use the $top=n query argument.
