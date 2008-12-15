@@ -165,8 +165,6 @@ namespace Amundsen.Azure.CommandLine
     private string contentMD5 = string.Empty;
     private string authHeader = string.Empty;
     private string method = string.Empty;
-    string nextPartKey = string.Empty;
-    string nextRowKey = string.Empty;
 
     public void Tables(string[] args)
     {
@@ -435,6 +433,9 @@ namespace Amundsen.Azure.CommandLine
     // cool query parser goes here.
     public void Queries(string[] args)
     {
+      string nextPartKey = string.Empty;
+      string nextRowKey = string.Empty;
+      string nextTableName = string.Empty;
       int query = 1;
       method = "GET";
       
@@ -456,7 +457,8 @@ namespace Amundsen.Azure.CommandLine
       // support custom continuation headers
       nextPartKey = (client.ResponseHeaders["x-ms-continuation-NextPartitionKey"] != null ? client.ResponseHeaders["x-ms-continuation-NextPartitionKey"] : string.Empty);
       nextRowKey = (client.ResponseHeaders["x-ms-continuation-NextRowKey"] != null ? client.ResponseHeaders["x-ms-continuation-NextRowKey"] : string.Empty);
-      if (nextPartKey != string.Empty && nextRowKey != string.Empty)
+      nextTableName = (client.ResponseHeaders["x-ms-continuation-NextTableName"] != null ? client.ResponseHeaders["x-ms-continuation-NextTableName"] : string.Empty);
+      if (nextTableName != string.Empty || (nextPartKey != string.Empty && nextRowKey != string.Empty))
       {
         // get user keypoke
         Console.Write("[n]ext, e[x]it");
@@ -469,12 +471,25 @@ namespace Amundsen.Azure.CommandLine
         // ok, let's get next page
         if (ki.KeyChar=='n')
         {
-          // fix-up query string for continuation
+          // strip any existing continuation info from the url
           if (args[query].IndexOf("&NextPartitionKey=") != -1)
           {
             args[query] = args[query].Substring(0, args[query].IndexOf("&NextPartitionKey="));
           }
-          args[query] += string.Format(CultureInfo.CurrentCulture, "&NextPartitionKey={0}&NextRowKey={1}", nextPartKey, nextRowKey);
+          if (args[query].IndexOf("&NextTableName=") != -1)
+          {
+            args[query] = args[query].Substring(0, args[query].IndexOf("&NextTableName="));
+          }
+
+          // add the new continuation into to the url
+          if (nextTableName != string.Empty)
+          {
+            args[query] += string.Format(CultureInfo.CurrentCulture, "&NextTableName={0}", nextTableName);
+          }
+          else
+          {
+            args[query] += string.Format(CultureInfo.CurrentCulture, "&NextPartitionKey={0}&NextRowKey={1}", nextPartKey, nextRowKey);
+          }
           
           // get more data
           this.Queries(args);
