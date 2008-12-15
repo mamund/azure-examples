@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<feed xml:base="http://mamund.table.core.windows.net/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">mytable</title>
+  <id>http://mamund.table.core.windows.net/mytable</id>
+  <updated>2008-12-14T18:31:57Z</updated>
+  <link rel="self" title="mytable" href="mytable" />
+  <entry m:etag="W/&quot;datetime'2008-12-09T02%3A24%3A16.0509546Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='myparitionkey',RowKey='myrowkey1')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='myparitionkey',RowKey='myrowkey1')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>myparitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey1</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-09T02:24:16.0509546Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-09T02%3A23%3A54.0269546Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='myparitionkey',RowKey='myrowkey2')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='myparitionkey',RowKey='myrowkey2')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>myparitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey2</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-09T02:23:54.0269546Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-10T05%3A07%3A14.6474355Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='mypartitionkey',RowKey='myrowkey10')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='mypartitionkey',RowKey='myrowkey10')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>mypartitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey10</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-10T05:07:14.6474355Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-09T03%3A45%3A43.0900953Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='mypartitionkey',RowKey='myrowkey3')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='mypartitionkey',RowKey='myrowkey3')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>mypartitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey3</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-09T03:45:43.0900953Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-10T10%3A17%3A16.7668834Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='mypartitionkey',RowKey='myrowkey5')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='mypartitionkey',RowKey='myrowkey5')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>mypartitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey5</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-10T10:17:16.7668834Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-10T10%3A11%3A59.9606466Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='mypartitionkey',RowKey='myrowkey7')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='mypartitionkey',RowKey='myrowkey7')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>mypartitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey7</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-10T10:11:59.9606466Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:Email>me@examples.org</d:Email>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-10T10%3A15%3A56.1697248Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='mypartitionkey',RowKey='myrowkey8')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='mypartitionkey',RowKey='myrowkey8')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>mypartitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey8</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-10T10:15:56.1697248Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-10T10%3A12%3A07.7936466Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='mypartitionkey',RowKey='myrowkey9')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='mypartitionkey',RowKey='myrowkey9')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>mypartitionkey</d:PartitionKey>
+        <d:RowKey>myrowkey9</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-10T10:12:07.7936466Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:Email>me@examples.org</d:Email>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+  <entry m:etag="W/&quot;datetime'2008-12-14T05%3A30%3A31.0644Z'&quot;">
+    <id>http://mamund.table.core.windows.net/mytable(PartitionKey='order',RowKey='o-001')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T18:31:57Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="mytable" href="mytable(PartitionKey='order',RowKey='o-001')" />
+    <category term="mamund.mytable" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:PartitionKey>order</d:PartitionKey>
+        <d:RowKey>o-001</d:RowKey>
+        <d:Timestamp m:type="Edm.DateTime">2008-12-14T05:30:31.0644Z</d:Timestamp>
+        <d:Address>Mountain View</d:Address>
+        <d:Age m:type="Edm.Int32">23</d:Age>
+        <d:AmountDue m:type="Edm.Double">200.23</d:AmountDue>
+        <d:CustomerCode m:type="Edm.Guid">c9da6455-213d-42c9-9a79-3e9149a57833</d:CustomerCode>
+        <d:CustomerSince m:type="Edm.DateTime">2008-07-10T00:00:00Z</d:CustomerSince>
+        <d:IsActive m:type="Edm.Boolean">true</d:IsActive>
+        <d:NumOfOrders m:type="Edm.Int64">255</d:NumOfOrders>
+      </m:properties>
+    </content>
+  </entry>
+</feed>

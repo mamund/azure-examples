@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<feed xml:base="http://mamund.table.core.windows.net/" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Tables</title>
+  <id>http://mamund.table.core.windows.net/Tables</id>
+  <updated>2008-12-14T17:02:53Z</updated>
+  <link rel="self" title="Tables" href="Tables" />
+  <entry>
+    <id>http://mamund.table.core.windows.net/Tables('anothertable')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T17:02:53Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Tables" href="Tables('anothertable')" />
+    <category term="mamund.Tables" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:TableName>anothertable</d:TableName>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://mamund.table.core.windows.net/Tables('mcatable')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T17:02:53Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Tables" href="Tables('mcatable')" />
+    <category term="mamund.Tables" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:TableName>mcatable</d:TableName>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://mamund.table.core.windows.net/Tables('moretables')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T17:02:53Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Tables" href="Tables('moretables')" />
+    <category term="mamund.Tables" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:TableName>moretables</d:TableName>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://mamund.table.core.windows.net/Tables('mytable')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T17:02:53Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Tables" href="Tables('mytable')" />
+    <category term="mamund.Tables" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:TableName>mytable</d:TableName>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://mamund.table.core.windows.net/Tables('newtable')</id>
+    <title type="text"></title>
+    <updated>2008-12-14T17:02:53Z</updated>
+    <author>
+      <name />
+    </author>
+    <link rel="edit" title="Tables" href="Tables('newtable')" />
+    <category term="mamund.Tables" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme" />
+    <content type="application/xml">
+      <m:properties>
+        <d:TableName>newtable</d:TableName>
+      </m:properties>
+    </content>
+  </entry>
+</feed>
